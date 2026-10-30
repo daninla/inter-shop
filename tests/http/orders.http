@@ -1,0 +1,31 @@
+@host = http://localhost:5000/api
+
+### Get limited orders
+GET {{host}}/orders/limited
+
+### Get orders with id > middle
+GET {{host}}/orders/middle
+
+### Get orders by multiple customer ids
+GET {{host}}/orders/multiple?ids=10,11,12
+
+### Delete orders by array of customer ids
+DELETE {{host}}/orders/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update order
+PATCH {{host}}/orders/update
+Content-Type: application/json
+
+{
+  "order_id": 1,
+  "code": "ORD-1001-UPDATED",
+  "date": "2026-10-01T10:00:00.000Z",
+  "customer": 1,
+  "amount": 1998.99,
+  "paid": true
+}

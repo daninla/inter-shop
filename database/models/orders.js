@@ -12,7 +12,16 @@ export default class orders extends Model {
     },
     code: {
       type: DataTypes.STRING(100),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Order code is required',
+        },
+        len: {
+          args: [3, 100],
+          msg: 'Order code must be between 3 and 100 characters',
+        },
+      }
     },
     date: {
       type: DataTypes.DATE,
@@ -21,11 +30,25 @@ export default class orders extends Model {
     },
     customer: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        isInt: {
+          msg: 'Customer id must be an integer',
+        },
+      }
     },
     amount: {
       type: DataTypes.DECIMAL,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isDecimal: {
+          msg: 'Amount must be a valid decimal value',
+        },
+        min: {
+          args: [0],
+          msg: 'Amount cannot be negative',
+        },
+      }
     },
     paid: {
       type: DataTypes.BOOLEAN,

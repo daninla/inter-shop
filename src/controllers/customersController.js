@@ -5,7 +5,6 @@ export const getAllLimited = async (req, res, next) => {
   try {
     const rows = await models.customers.findAll({
       limit: 10,
-      order: ["id"],
     });
 
     res.json({ success: true, data: rows });
@@ -21,10 +20,9 @@ export const getGreaterThanMiddleId = async (req, res, next) => {
 
     const rows = await models.customers.findAll({
       where: { id: { [Op.gt]: startFrom } },
-      order: ["id"],
     });
 
-    res.json({ success: true, startFrom, total, data: rows });
+    res.json({ success: true, data: rows });
   } catch (error) {
     next(error);
   }
@@ -38,7 +36,6 @@ export const getByMultipleValues = async (req, res, next) => {
 
     const rows = await models.customers.findAll({
       where: { id: { [Op.in]: ids } },
-      order: ["id"],
     });
 
     res.json({ success: true, data: rows });
@@ -48,7 +45,6 @@ export const getByMultipleValues = async (req, res, next) => {
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  const attribute = "email";
   try {
     const { values } = req.body;
 
@@ -59,10 +55,10 @@ export const deleteByAttributeArray = async (req, res, next) => {
     }
 
     const deleted = await models.customers.destroy({
-      where: { [attribute]: { [Op.in]: values } },
+      where: { email: { [Op.in]: values } },
     });
 
-    res.json({ success: true, deletedCount: deleted, attribute });
+    res.json({ success: true, deletedCount: deleted });
   } catch (error) {
     next(error);
   }
@@ -78,12 +74,12 @@ export const updateCustomerData = async (req, res, next) => {
         .json({ success: false, message: "id is required" });
     }
 
-    const [updatedRows, [updatedCustomer]] = await models.customers.update(
+    const [, [updatedCustomer]] = await models.customers.update(
       { name, email },
       { where: { id }, returning: true },
     );
 
-    res.json({ success: true, updatedRows, data: updatedCustomer || null });
+    res.json({ success: true, data: updatedCustomer || null });
   } catch (error) {
     next(error);
   }

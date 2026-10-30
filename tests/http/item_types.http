@@ -1,0 +1,28 @@
+@host = http://localhost:5000/api
+
+### Get limited item types
+GET {{host}}/item-types/limited
+
+### Get item types with id > middle
+GET {{host}}/item-types/middle
+
+### Get item types by multiple ids
+GET {{host}}/item-types/multiple?ids=10,11,12
+
+### Delete item types by array of ids
+DELETE {{host}}/item-types/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update item type
+PATCH {{host}}/item-types/update
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "Смартфон обновлён",
+  "description": "Обновлённое описание типа"
+}

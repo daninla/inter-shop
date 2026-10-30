@@ -1,0 +1,28 @@
+@host = http://localhost:5000/api
+
+### Get limited brands
+GET {{host}}/brands/limited
+
+### Get brands with id > middle
+GET {{host}}/brands/middle
+
+### Get brands by multiple titles
+GET {{host}}/brands/multiple?titles=Samsung,Dell,Xiaomi
+
+### Delete brands by array of titles
+DELETE {{host}}/brands/multiple
+Content-Type: application/json
+
+{
+  "values": ["Samsung", "Dell"]
+}
+
+### Update brand
+PATCH {{host}}/brands/update
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "Apple Updated",
+  "description": "Updated Apple brand"
+}

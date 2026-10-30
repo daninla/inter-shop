@@ -5,7 +5,6 @@ export const getAllLimited = async (req, res, next) => {
   try {
     const rows = await models.brands.findAll({
       limit: 10,
-      order: ["id"],
     });
 
     res.json({ success: true, data: rows });
@@ -21,10 +20,9 @@ export const getGreaterThanMiddleId = async (req, res, next) => {
 
     const rows = await models.brands.findAll({
       where: { id: { [Op.gt]: startFrom } },
-      order: ["id"],
     });
 
-    res.json({ success: true, startFrom, total, data: rows });
+    res.json({ success: true, data: rows });
   } catch (error) {
     next(error);
   }
@@ -38,7 +36,6 @@ export const getByMultipleValues = async (req, res, next) => {
 
     const rows = await models.brands.findAll({
       where: { title: { [Op.in]: titles } },
-      order: ["id"],
     });
 
     res.json({ success: true, data: rows });
@@ -48,7 +45,6 @@ export const getByMultipleValues = async (req, res, next) => {
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  const attribute = "title";
   try {
     const { values } = req.body;
 
@@ -59,10 +55,10 @@ export const deleteByAttributeArray = async (req, res, next) => {
     }
 
     const deleted = await models.brands.destroy({
-      where: { [attribute]: { [Op.in]: values } },
+      where: { title: { [Op.in]: values } },
     });
 
-    res.json({ success: true, deletedCount: deleted, attribute });
+    res.json({ success: true, deletedCount: deleted });
   } catch (error) {
     next(error);
   }
@@ -78,12 +74,12 @@ export const updateBrandData = async (req, res, next) => {
         .json({ success: false, message: "id is required" });
     }
 
-    const [updatedRows, [updatedBrand]] = await models.brands.update(
+    const [, [updatedBrand]] = await models.brands.update(
       { title, description },
       { where: { id }, returning: true },
     );
 
-    res.json({ success: true, updatedRows, data: updatedBrand || null });
+    res.json({ success: true, data: updatedBrand || null });
   } catch (error) {
     next(error);
   }

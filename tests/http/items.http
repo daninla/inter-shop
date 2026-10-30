@@ -1,0 +1,28 @@
+@host = http://localhost:5000/api
+
+### Get limited items
+GET {{host}}/items/limited
+
+### Get items with id > middle
+GET {{host}}/items/middle
+
+### Get items by multiple brand ids
+GET {{host}}/items/multiple?ids=10,11,12
+
+### Delete items by array of brand ids
+DELETE {{host}}/items/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update item
+PATCH {{host}}/items/update
+Content-Type: application/json
+
+{
+  "item_id": 1,
+  "price": 1099.99,
+  "amount": 15
+}

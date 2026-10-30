@@ -12,11 +12,26 @@ export default class stores extends Model {
     },
     title: {
       type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Store title is required',
+        },
+        len: {
+          args: [2, 255],
+          msg: 'Store title must be between 2 and 255 characters',
+        },
+      }
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 2000],
+          msg: 'Description must not exceed 2000 characters',
+        },
+      }
     }
   }, {
     sequelize,

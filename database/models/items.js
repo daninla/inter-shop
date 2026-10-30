@@ -28,7 +28,16 @@ export default class items extends Model {
     },
     price: {
       type: DataTypes.DECIMAL,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isDecimal: {
+          msg: 'Price must be a valid decimal value',
+        },
+        min: {
+          args: [0],
+          msg: 'Price must be greater than or equal to 0',
+        },
+      }
     },
     store_id: {
       type: DataTypes.INTEGER,
@@ -37,7 +46,13 @@ export default class items extends Model {
     amount: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
+      validate: {
+        min: {
+          args: [0],
+          msg: 'Amount cannot be negative',
+        },
+      }
     }
   }, {
     sequelize,

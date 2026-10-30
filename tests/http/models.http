@@ -1,0 +1,29 @@
+@host = http://localhost:5000/api
+
+### Get limited models
+GET {{host}}/models/limited
+
+### Get models with id > middle
+GET {{host}}/models/middle
+
+### Get models by multiple ids
+GET {{host}}/models/multiple?ids=10,11,12
+
+### Delete models by array of ids
+DELETE {{host}}/models/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update model
+PATCH {{host}}/models/update
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "iPhone 15 Pro",
+  "brand_id": 1,
+  "description": "Updated model"
+}

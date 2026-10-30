@@ -7,12 +7,22 @@ export default class item_order extends Model {
     item_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
+      validate: {
+        isInt: {
+          msg: 'Item id must be an integer',
+        },
+      }
     },
     order_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
+      validate: {
+        isInt: {
+          msg: 'Order id must be an integer',
+        },
+      }
     }
   }, {
     sequelize,

@@ -12,15 +12,35 @@ export default class models extends Model {
     },
     title: {
       type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Model title is required',
+        },
+        len: {
+          args: [2, 255],
+          msg: 'Model title must be between 2 and 255 characters',
+        },
+      }
     },
     brand_id: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        isInt: {
+          msg: 'Brand id must be an integer',
+        },
+      }
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 2000],
+          msg: 'Description must not exceed 2000 characters',
+        },
+      }
     }
   }, {
     sequelize,

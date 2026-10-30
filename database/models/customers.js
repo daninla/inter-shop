@@ -20,6 +20,9 @@ export default class customers extends Model {
         allowNull: false,
         unique: 'customers_email_key',
         validate: {
+          notEmpty: {
+            msg: 'Email is required',
+          },
           isEmail: {
             msg: 'Email is not valid',
           },
@@ -29,6 +32,9 @@ export default class customers extends Model {
         type: DataTypes.STRING(255),
         allowNull: false,
         validate: {
+          notEmpty: {
+            msg: 'Password is required',
+          },
           len: {
             args: [6, 255],
             msg: 'Password must be at least 6 characters long',

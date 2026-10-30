@@ -1,0 +1,28 @@
+@host = http://localhost:5000/api
+
+### Get limited item categories
+GET {{host}}/item-categories/limited
+
+### Get item categories with id > middle
+GET {{host}}/item-categories/middle
+
+### Get item categories by multiple ids
+GET {{host}}/item-categories/multiple?ids=10,11,12
+
+### Delete item categories by array of ids
+DELETE {{host}}/item-categories/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update item category
+PATCH {{host}}/item-categories/update
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "Телефоны обновлённые",
+  "description": "Обновлённое описание категории"
+}

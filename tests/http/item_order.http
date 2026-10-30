@@ -1,0 +1,27 @@
+@host = http://localhost:5000/api
+
+### Get limited item order relations
+GET {{host}}/item-order/limited
+
+### Get item order relations with item_id > middle
+GET {{host}}/item-order/middle
+
+### Get item order relations by multiple item ids
+GET {{host}}/item-order/multiple?ids=10,11,12
+
+### Delete item order relations by array of item ids
+DELETE {{host}}/item-order/multiple
+Content-Type: application/json
+
+{
+  "values": [10, 11]
+}
+
+### Update item order relation
+PATCH {{host}}/item-order/update
+Content-Type: application/json
+
+{
+  "item_id": 10,
+  "order_id": 10
+}
