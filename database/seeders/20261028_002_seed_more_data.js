@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -33,11 +34,11 @@ module.exports = {
     ];
 
     const customers = [
-      { id: 10, name: 'Сергей Кузнецов', email: 'sergey@example.com' },
-      { id: 11, name: 'Елена Орлова', email: 'elena@example.com' },
-      { id: 12, name: 'Дмитрий Васильев', email: 'dmitry@example.com' },
-      { id: 13, name: 'Ольга Михайлова', email: 'olga@example.com' },
-      { id: 14, name: 'Николай Григорьев', email: 'nikolay@example.com' },
+      { id: 10, name: 'Сергей Кузнецов', email: 'sergey@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 11, name: 'Елена Орлова', email: 'elena@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 12, name: 'Дмитрий Васильев', email: 'dmitry@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 13, name: 'Ольга Михайлова', email: 'olga@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 14, name: 'Николай Григорьев', email: 'nikolay@example.com', password: bcrypt.hashSync('Password123', 10) },
     ];
 
     const models = [

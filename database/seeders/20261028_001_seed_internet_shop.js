@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+
 module.exports = {
   async up(queryInterface) {
     await queryInterface.bulkInsert('brands', [
@@ -25,9 +27,9 @@ module.exports = {
     ]);
 
     await queryInterface.bulkInsert('customers', [
-      { id: 1, name: 'Иван Иванов', email: 'ivan@example.com' },
-      { id: 2, name: 'Мария Петрова', email: 'maria@example.com' },
-      { id: 3, name: 'Алексей Сидоров', email: 'alex@example.com' },
+      { id: 1, name: 'Иван Иванов', email: 'ivan@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 2, name: 'Мария Петрова', email: 'maria@example.com', password: bcrypt.hashSync('Password123', 10) },
+      { id: 3, name: 'Алексей Сидоров', email: 'alex@example.com', password: bcrypt.hashSync('Password123', 10) },
     ]);
 
     await queryInterface.bulkInsert('models', [
