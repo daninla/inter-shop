@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import http from "http";
 import app from "./src/app.js";
-import { sequelize } from "./src/db.js";
+import db from "./database/models/index.js";
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 async function startServer() {
   try {
-    await sequelize.authenticate();
+    await db.sequelize.authenticate();
     console.log("Database connected");
 
     server.listen(PORT, () => {

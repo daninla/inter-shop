@@ -1,10 +1,25 @@
 import { Op } from "sequelize";
-import { models } from "../db.js";
+import db from "../../database/models/index.js";
+
+export const createOrderData = async (req, res, next) => {
+  try {
+    const { code, date, customer, amount, paid } = req.body;
+
+    const newOrder = await db.Orders.create({ code, date, customer, amount, paid });
+
+    res.status(201).json({ success: true, data: newOrder });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAllLimited = async (req, res, next) => {
   try {
-    const rows = await models.orders.findAll({
-      limit: 10,
+    const limit = Number(req.query.limit) || 10;
+    const safeLimit = Math.max(1, Math.min(limit, 100));
+
+    const rows = await db.Orders.findAll({
+      limit: safeLimit,
     });
 
     res.json({ success: true, data: rows });
@@ -15,10 +30,10 @@ export const getAllLimited = async (req, res, next) => {
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
   try {
-    const total = await models.orders.count();
+    const total = await db.Orders.count();
     const startFrom = Math.floor(total / 2);
 
-    const rows = await models.orders.findAll({
+    const rows = await db.Orders.findAll({
       where: { order_id: { [Op.gt]: startFrom } },
     });
 
@@ -32,7 +47,7 @@ export const getByMultipleValues = async (req, res, next) => {
   try {
     const ids = req.query.ids ? req.query.ids.split(",").map(Number) : [10, 11, 12];
 
-    const rows = await models.orders.findAll({
+    const rows = await db.Orders.findAll({
       where: { customer: { [Op.in]: ids } },
     });
 
@@ -50,7 +65,7 @@ export const deleteByAttributeArray = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "values must be a non-empty array" });
     }
 
-    const deleted = await models.orders.destroy({
+    const deleted = await db.Orders.destroy({
       where: { customer: { [Op.in]: values } },
     });
 
@@ -68,7 +83,7 @@ export const updateOrderData = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "order_id is required" });
     }
 
-    const [, [updatedOrder]] = await models.orders.update(
+    const [, [updatedOrder]] = await db.Orders.update(
       { code, date, customer, amount, paid },
       { where: { order_id }, returning: true },
     );

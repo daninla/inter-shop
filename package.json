@@ -2,13 +2,15 @@
   "name": "inter-shop",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "sequelize-cli db:seed:all",
-    "seed:undo": "sequelize-cli db:seed:undo:all"
+    "db:migrate": "sequelize-cli db:migrate --config ./database/config/configDB.js --migrations-path ./database/migrations --models-path ./database/models --seeders-path ./database/seeders",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo --config ./database/config/configDB.js --migrations-path ./database/migrations --models-path ./database/models --seeders-path ./database/seeders",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all --config ./database/config/configDB.js --migrations-path ./database/migrations --models-path ./database/models --seeders-path ./database/seeders",
+    "db:seed": "sequelize-cli db:seed:all --config ./database/config/configDB.js --migrations-path ./database/migrations --models-path ./database/models --seeders-path ./database/seeders",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all --config ./database/config/configDB.js --migrations-path ./database/migrations --models-path ./database/models --seeders-path ./database/seeders"
   },
   "author": "",
   "license": "ISC",

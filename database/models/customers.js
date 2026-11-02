@@ -2,7 +2,7 @@ import _sequelize from 'sequelize';
 import bcrypt from 'bcryptjs';
 const { Model, Sequelize } = _sequelize;
 
-export default class customers extends Model {
+export default class Customers extends Model {
   static init(sequelize, DataTypes) {
     return super.init({
       id: {

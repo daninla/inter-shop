@@ -1,7 +1,7 @@
 import _sequelize from 'sequelize';
 const { Model, Sequelize } = _sequelize;
 
-export default class item_order extends Model {
+export default class ItemOrder extends Model {
   static init(sequelize, DataTypes) {
   return super.init({
     item_id: {

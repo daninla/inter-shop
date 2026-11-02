@@ -1,10 +1,25 @@
 import { Op } from "sequelize";
-import { models } from "../db.js";
+import db from "../../database/models/index.js";
+
+export const createItemOrderData = async (req, res, next) => {
+  try {
+    const { item_id, order_id } = req.body;
+
+    const newItemOrder = await db.ItemOrder.create({ item_id, order_id });
+
+    res.status(201).json({ success: true, data: newItemOrder });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAllLimited = async (req, res, next) => {
   try {
-    const rows = await models.item_order.findAll({
-      limit: 10,
+    const limit = Number(req.query.limit) || 10;
+    const safeLimit = Math.max(1, Math.min(limit, 100));
+
+    const rows = await db.ItemOrder.findAll({
+      limit: safeLimit,
     });
 
     res.json({ success: true, data: rows });
@@ -15,10 +30,10 @@ export const getAllLimited = async (req, res, next) => {
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
   try {
-    const total = await models.item_order.count();
+    const total = await db.ItemOrder.count();
     const startFrom = Math.floor(total / 2);
 
-    const rows = await models.item_order.findAll({
+    const rows = await db.ItemOrder.findAll({
       where: { item_id: { [Op.gt]: startFrom } },
     });
 
@@ -32,7 +47,7 @@ export const getByMultipleValues = async (req, res, next) => {
   try {
     const ids = req.query.ids ? req.query.ids.split(",").map(Number) : [10, 11, 12];
 
-    const rows = await models.item_order.findAll({
+    const rows = await db.ItemOrder.findAll({
       where: { item_id: { [Op.in]: ids } },
     });
 
@@ -50,7 +65,7 @@ export const deleteByAttributeArray = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "values must be a non-empty array" });
     }
 
-    const deleted = await models.item_order.destroy({
+    const deleted = await db.ItemOrder.destroy({
       where: { item_id: { [Op.in]: values } },
     });
 
@@ -73,7 +88,7 @@ export const updateItemOrderData = async (req, res, next) => {
       order_id: newOrderId ?? order_id,
     };
 
-    const currentRecord = await models.item_order.findOne({
+    const currentRecord = await db.ItemOrder.findOne({
       where: { item_id, order_id },
     });
 

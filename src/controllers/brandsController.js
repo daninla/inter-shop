@@ -1,10 +1,25 @@
 import { Op } from "sequelize";
-import { models } from "../db.js";
+import db from "../../database/models/index.js";
+
+export const createBrandData = async (req, res, next) => {
+  try {
+    const { title, description } = req.body;
+
+    const newBrand = await db.Brands.create({ title, description });
+
+    res.status(201).json({ success: true, data: newBrand });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAllLimited = async (req, res, next) => {
   try {
-    const rows = await models.brands.findAll({
-      limit: 10,
+    const limit = Number(req.query.limit) || 10;
+    const safeLimit = Math.max(1, Math.min(limit, 100));
+
+    const rows = await db.Brands.findAll({
+      limit: safeLimit,
     });
 
     res.json({ success: true, data: rows });
@@ -15,10 +30,10 @@ export const getAllLimited = async (req, res, next) => {
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
   try {
-    const total = await models.brands.count();
+    const total = await db.Brands.count();
     const startFrom = Math.floor(total / 2);
 
-    const rows = await models.brands.findAll({
+    const rows = await db.Brands.findAll({
       where: { id: { [Op.gt]: startFrom } },
     });
 
@@ -34,7 +49,7 @@ export const getByMultipleValues = async (req, res, next) => {
       ? req.query.titles.split(",")
       : ["Samsung", "Dell", "Xiaomi"];
 
-    const rows = await models.brands.findAll({
+    const rows = await db.Brands.findAll({
       where: { title: { [Op.in]: titles } },
     });
 
@@ -54,7 +69,7 @@ export const deleteByAttributeArray = async (req, res, next) => {
         .json({ success: false, message: "values must be a non-empty array" });
     }
 
-    const deleted = await models.brands.destroy({
+    const deleted = await db.Brands.destroy({
       where: { title: { [Op.in]: values } },
     });
 
@@ -74,7 +89,7 @@ export const updateBrandData = async (req, res, next) => {
         .json({ success: false, message: "id is required" });
     }
 
-    const [, [updatedBrand]] = await models.brands.update(
+    const [, [updatedBrand]] = await db.Brands.update(
       { title, description },
       { where: { id }, returning: true },
     );

@@ -1,4 +1,4 @@
-require('dotenv').config();
+import "dotenv/config";
 
 const config = {
   development: {
@@ -7,8 +7,7 @@ const config = {
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    dialect: 'postgres',
+    dialect: "postgres",
   },
 };
-
-module.exports = config;
+export default config;
