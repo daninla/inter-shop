@@ -72,4 +72,16 @@ export default class Customers extends Model {
       ],
     });
   }
+
+  static associate(models) {
+    Customers.hasMany(models.Orders, {
+      foreignKey: 'customer',
+      as: 'orders',
+    });
+
+    Customers.hasOne(models.Orders, {
+      foreignKey: 'customer',
+      as: 'activeOrder',
+    });
+  }
 }

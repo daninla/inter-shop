@@ -99,3 +99,43 @@ export const updateCustomerData = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCustomerWithMostOrders = async (req, res, next) => {
+  try {
+    const [rows] = await db.sequelize.query(`
+      SELECT
+        c.name,
+        COUNT(o.order_id) AS purchases_count
+      FROM customers AS c
+      LEFT JOIN orders AS o ON o.customer = c.id
+      GROUP BY c.id, c.name
+      ORDER BY purchases_count DESC, c.id ASC
+      LIMIT 1;
+    `);
+
+    res.json({ success: true, data: rows[0] || null });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCustomerWithMostExpensiveItem = async (req, res, next) => {
+  try {
+    const [rows] = await db.sequelize.query(`
+      SELECT
+        c.name,
+        MAX(i.price) AS max_item_price
+      FROM customers AS c
+      JOIN orders AS o ON o.customer = c.id
+      JOIN item_order AS io ON io.order_id = o.order_id
+      JOIN items AS i ON i.item_id = io.item_id
+      GROUP BY c.id, c.name
+      ORDER BY max_item_price DESC, c.id ASC
+      LIMIT 1;
+    `);
+
+    res.json({ success: true, data: rows[0] || null });
+  } catch (error) {
+    next(error);
+  }
+};

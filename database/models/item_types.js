@@ -3,50 +3,55 @@ const { Model, Sequelize } = _sequelize;
 
 export default class ItemTypes extends Model {
   static init(sequelize, DataTypes) {
-  return super.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    title: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Item type title is required',
-        },
-        len: {
-          args: [2, 255],
-          msg: 'Item type title must be between 2 and 255 characters',
-        },
-      }
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      validate: {
-        len: {
-          args: [0, 2000],
-          msg: 'Description must not exceed 2000 characters',
-        },
-      }
-    }
-  }, {
-    sequelize,
-    tableName: 'item_types',
-    schema: 'public',
-    timestamps: false,
-    indexes: [
-      {
-        name: "item_types_pkey",
-        unique: true,
-        fields: [
-          { name: "id" },
-        ]
+    return super.init({
+      id: {
+        autoIncrement: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
       },
-    ]
-  });
+      title: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: 'Item type title is required',
+          },
+          len: {
+            args: [2, 255],
+            msg: 'Item type title must be between 2 and 255 characters',
+          },
+        },
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        validate: {
+          len: {
+            args: [0, 2000],
+            msg: 'Description must not exceed 2000 characters',
+          },
+        },
+      },
+    }, {
+      sequelize,
+      tableName: 'item_types',
+      schema: 'public',
+      timestamps: false,
+      indexes: [
+        {
+          name: 'item_types_pkey',
+          unique: true,
+          fields: [{ name: 'id' }],
+        },
+      ],
+    });
+  }
+
+  static associate(models) {
+    ItemTypes.hasMany(models.Items, {
+      foreignKey: 'type_id',
+      as: 'items',
+    });
   }
 }

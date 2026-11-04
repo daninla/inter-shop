@@ -21,7 +21,7 @@ export default function initModels(sequelize) {
   const Orders = _orders.init(sequelize, DataTypes);
   const Stores = _stores.init(sequelize, DataTypes);
 
-  return {
+  const db = {
     Brands,
     Customers,
     ItemCategories,
@@ -32,4 +32,12 @@ export default function initModels(sequelize) {
     Orders,
     Stores,
   };
+
+  Object.values(db).forEach((model) => {
+    if (typeof model.associate === 'function') {
+      model.associate(db);
+    }
+  });
+
+  return db;
 }

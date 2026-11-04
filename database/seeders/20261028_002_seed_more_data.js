@@ -66,6 +66,9 @@ module.exports = {
       { order_id: 12, code: 'ORD-2003', date: new Date('2026-11-05T09:45:00Z'), customer: 12, amount: '499.00', paid: false },
       { order_id: 13, code: 'ORD-2004', date: new Date('2026-11-08T12:10:00Z'), customer: 13, amount: '249.00', paid: true },
       { order_id: 14, code: 'ORD-2005', date: new Date('2026-11-11T18:30:00Z'), customer: 14, amount: '1499.00', paid: false },
+      { order_id: 15, code: 'ORD-2006', date: new Date('2026-11-12T10:20:00Z'), customer: 10, amount: '1499.00', paid: true },
+      { order_id: 16, code: 'ORD-2007', date: new Date('2026-11-13T09:00:00Z'), customer: 10, amount: '399.00', paid: true },
+      { order_id: 17, code: 'ORD-2008', date: new Date('2026-11-14T14:40:00Z'), customer: 10, amount: '250.00', paid: false },
     ];
 
     await queryInterface.bulkInsert('brands', brands);
@@ -82,6 +85,9 @@ module.exports = {
       { item_id: 15, order_id: 12 },
       { item_id: 17, order_id: 13 },
       { item_id: 13, order_id: 14 },
+      { item_id: 13, order_id: 15 },
+      { item_id: 11, order_id: 16 },
+      { item_id: 16, order_id: 17 },
     ]);
   },
 
