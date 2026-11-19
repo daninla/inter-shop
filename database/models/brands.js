@@ -23,6 +23,10 @@ export default class Brands extends Model {
           },
         },
       },
+      logo: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
