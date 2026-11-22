@@ -1,186 +1,42 @@
-import { Op } from "sequelize";
+import BaseController from "./BaseController.js";
 import db from "../database/models/index.js";
-import {
-  rollbackAndRespond,
-  rollbackTransaction,
-} from "../utils/transactionResponse.js";
 
-export const createBrandData = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-    const { title, description } = req.body;
-
-    const logo = req.file ? `/uploads/brands/${req.file.filename}` : null;
-
-    const newBrand = await db.Brands.create(
-      { title, description, logo },
-      { transaction },
-    );
-
-    await transaction.commit();
-
-    res.status(201).json({ success: true, data: newBrand });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
-  }
-};
-
-export const getAllLimited = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-    const limit = Number(req.query.limit) || 10;
-    const safeLimit = Math.max(1, Math.min(limit, 100));
-
-    const rows = await db.Brands.findAll({
-      transaction,
-      limit: safeLimit,
+export class BrandsController extends BaseController {
+  constructor() {
+    super(db.Brands, {
+      createFields: ["title", "description"],
+      filterField: "title",
+      queryParameter: "titles",
+      defaultValues: ["Samsung", "Dell", "Xiaomi"],
+      numericValues: false,
+      idFromParams: true,
     });
-
-    await transaction.commit();
-
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
   }
-};
 
-export const getGreaterThanMiddleId = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-
-    const total = await db.Brands.count({ transaction });
-    const offset = Math.floor(total / 2);
-
-    const rows = await db.Brands.findAll({
-      transaction,
-      offset,
-      order: [["id", "ASC"]],
-    });
-
-    await transaction.commit();
-
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
+  getCreateData(req) {
+    return {
+      ...super.getCreateData(req),
+      logo: req.file ? `/uploads/brands/${req.file.filename}` : null,
+    };
   }
-};
 
-export const getByMultipleValues = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-    const titles = req.query.titles
-      ? req.query.titles.split(",")
-      : ["Samsung", "Dell", "Xiaomi"];
-
-    const rows = await db.Brands.findAll({
-      transaction,
-      where: { title: { [Op.in]: titles } },
-    });
-
-    await transaction.commit();
-
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
-  }
-};
-
-export const deleteByAttributeArray = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-    const { values } = req.body;
-
-    if (!Array.isArray(values) || !values.length) {
-      return await rollbackAndRespond(
-        res,
-        transaction,
-        400,
-        "values must be a non-empty array",
-      );
-    }
-
-    const deleted = await db.Brands.destroy({
-      transaction,
-      where: { title: { [Op.in]: values } },
-    });
-
-    await transaction.commit();
-
-    res.json({ success: true, deletedCount: deleted });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
-  }
-};
-
-export const updateBrandData = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
+  updateBrandLogo = async (req, res, next) => {
     const { id } = req.params;
-    const { title, description } = req.body;
-
-    if (!id) {
-      return await rollbackAndRespond(res, transaction, 400, "id is required");
+    if (!id || !req.file) {
+      return res.status(400).json({
+        success: false,
+        message: !id ? "id is required" : "logo file is required",
+      });
     }
-
-    const data = { title, description };
-
-    const [, [updatedBrand]] = await db.Brands.update(data, {
-      where: { id },
-      returning: true,
-      transaction,
-    });
-
-    await transaction.commit();
-
-    res.json({ success: true, data: updatedBrand || null });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
-  }
-};
-
-export const updateBrandLogo = async (req, res, next) => {
-  let transaction;
-  try {
-    transaction = await db.sequelize.transaction();
-    const { id } = req.params;
-
-    if (!id) {
-      return await rollbackAndRespond(res, transaction, 400, "id is required");
-    }
-
-    if (!req.file) {
-      return await rollbackAndRespond(
-        res,
-        transaction,
-        400,
-        "logo file is required",
+    return this.execute(res, next, async (transaction) => {
+      const logo = `/uploads/brands/${req.file.filename}`;
+      const [, [updatedBrand]] = await this.model.update(
+        { logo },
+        { where: { id }, returning: true, transaction },
       );
-    }
+      return { data: updatedBrand || null };
+    });
+  };
+}
 
-    const logo = `/uploads/brands/${req.file.filename}`;
-
-    const [, [updatedBrand]] = await db.Brands.update(
-      { logo },
-      { where: { id }, returning: true, transaction },
-    );
-
-    await transaction.commit();
-
-    res.json({ success: true, data: updatedBrand || null });
-  } catch (error) {
-    await rollbackTransaction(transaction);
-    next(error);
-  }
-};
+export default new BrandsController();
