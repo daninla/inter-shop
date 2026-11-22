@@ -1,16 +1,10 @@
 import multer from "multer";
-import { mkdirSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-
-const uploadDirectory = fileURLToPath(
-  new URL("../../uploads/brands/", import.meta.url),
-);
-
-mkdirSync(uploadDirectory, { recursive: true });
+import { staticPath } from "../config/staticPath.js";
+import { mkdir } from "node:fs";
 
 const storage = multer.diskStorage({
   destination(req, file, callback) {
-    callback(null, uploadDirectory);
+    mkdir(staticPath, { recursive: true }, (error) => callback(error, staticPath));
   },
   filename(req, file, callback) {
     callback(null, `${Date.now()}-${file.originalname.toLowerCase()}`);

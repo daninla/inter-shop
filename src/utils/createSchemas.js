@@ -8,13 +8,15 @@ export const brandCreateSchema = yup.object({
 export const customerCreateSchema = yup.object({
   name: yup.string().trim().min(2).max(255).required(),
   email: yup.string().trim().email('Email is not valid').required(),
+  password: yup.string().min(6).max(255).required(),
 });
 
 export const itemCreateSchema = yup.object({
   brand_id: yup.number().integer().positive().required(),
   model_id: yup.number().integer().positive().required(),
-  item_type_id: yup.number().integer().positive().required(),
-  title: yup.string().trim().min(2).max(255).required(),
+  type_id: yup.number().integer().positive().required(),
+  categ_id: yup.number().integer().positive().nullable(),
+  store_id: yup.number().integer().positive().nullable(),
   price: yup.number().positive().required(),
   amount: yup.number().integer().min(0).required(),
 });
@@ -42,7 +44,7 @@ export const modelCreateSchema = yup.object({
 
 export const orderCreateSchema = yup.object({
   code: yup.string().trim().min(3).max(100).required(),
-  date: yup.date().nullable(),
+  date: yup.date().nonNullable(),
   customer: yup.number().integer().positive().nullable(),
   amount: yup.number().positive().required(),
   paid: yup.boolean().required(),

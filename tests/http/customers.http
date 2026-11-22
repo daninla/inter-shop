@@ -1,5 +1,15 @@
 @host = http://localhost:5000/api
 
+### Create customer (password is required and is not returned in the response)
+POST {{host}}/customers/create
+Content-Type: application/json
+
+{
+  "name": "Test Customer",
+  "email": "test.customer@example.com",
+  "password": "Password123"
+}
+
 ### Get limited customers
 GET {{host}}/customers/limited
 

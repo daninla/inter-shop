@@ -1,5 +1,19 @@
 @host = http://localhost:5000/api
 
+### Create item (type_id matches the Items model; title belongs to its model)
+POST {{host}}/items/create
+Content-Type: application/json
+
+{
+  "brand_id": 1,
+  "model_id": 1,
+  "type_id": 1,
+  "categ_id": 1,
+  "store_id": 1,
+  "price": 999.99,
+  "amount": 5
+}
+
 ### Get limited items
 GET {{host}}/items/limited
 

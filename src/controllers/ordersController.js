@@ -1,10 +1,11 @@
 import { Op } from "sequelize";
 import db from "../database/models/index.js";
-import { rollbackAndRespond } from "../utils/transactionResponse.js";
+import { rollbackAndRespond, rollbackTransaction } from "../utils/transactionResponse.js";
 
 export const createOrderData = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const { code, date, customer, amount, paid } = req.body;
 
     const newOrder = await db.Orders.create(
@@ -16,14 +17,15 @@ export const createOrderData = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: newOrder });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getAllLimited = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const limit = Number(req.query.limit) || 10;
     const safeLimit = Math.max(1, Math.min(limit, 100));
 
@@ -36,35 +38,38 @@ export const getAllLimited = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
 
     const total = await db.Orders.count({ transaction });
-    const startFrom = Math.floor(total / 2);
+    const offset = Math.floor(total / 2);
 
     const rows = await db.Orders.findAll({
       transaction,
-      where: { order_id: { [Op.gt]: startFrom } },
+      offset,
+      order: [['order_id', 'ASC']],
     });
 
     await transaction.commit();
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getByMultipleValues = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const ids = req.query.ids
       ? req.query.ids.split(",").map(Number)
       : [10, 11, 12];
@@ -78,18 +83,19 @@ export const getByMultipleValues = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const { values } = req.body;
 
     if (!Array.isArray(values) || !values.length) {
-      return rollbackAndRespond(
+      return await rollbackAndRespond(
         res,
         transaction,
         400,
@@ -106,18 +112,19 @@ export const deleteByAttributeArray = async (req, res, next) => {
 
     res.json({ success: true, deletedCount: deleted });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const updateOrderData = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const { order_id, code, date, customer, amount, paid } = req.body;
 
     if (!order_id) {
-      return rollbackAndRespond(
+      return await rollbackAndRespond(
         res,
         transaction,
         400,
@@ -134,7 +141,7 @@ export const updateOrderData = async (req, res, next) => {
 
     res.json({ success: true, data: updatedOrder || null });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };

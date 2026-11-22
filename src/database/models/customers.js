@@ -46,6 +46,9 @@ export default class Customers extends Model {
       tableName: 'customers',
       schema: 'public',
       timestamps: false,
+      defaultScope: {
+        attributes: { exclude: ['password'] },
+      },
       hooks: {
         beforeCreate: async (customer) => {
           if (customer.password) {
@@ -71,6 +74,12 @@ export default class Customers extends Model {
         },
       ],
     });
+  }
+
+  toJSON() {
+    const values = super.toJSON();
+    delete values.password;
+    return values;
   }
 
   static associate(models) {

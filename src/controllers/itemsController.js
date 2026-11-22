@@ -1,18 +1,20 @@
 import { Op } from "sequelize";
 import db from "../database/models/index.js";
-import { rollbackAndRespond } from "../utils/transactionResponse.js";
+import { rollbackAndRespond, rollbackTransaction } from "../utils/transactionResponse.js";
 
 export const createItemData = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
-    const { brand_id, model_id, item_type_id, title, price, amount } = req.body;
+    transaction = await db.sequelize.transaction();
+    const { brand_id, model_id, type_id, categ_id, store_id, price, amount } = req.body;
 
     const newItem = await db.Items.create(
       {
         brand_id,
         model_id,
-        item_type_id,
-        title,
+        type_id,
+        categ_id,
+        store_id,
         price,
         amount,
       },
@@ -23,14 +25,15 @@ export const createItemData = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: newItem });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getAllLimited = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const limit = Number(req.query.limit) || 10;
     const safeLimit = Math.max(1, Math.min(limit, 100));
 
@@ -43,35 +46,38 @@ export const getAllLimited = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
 
     const total = await db.Items.count({ transaction });
-    const startFrom = Math.floor(total / 2);
+    const offset = Math.floor(total / 2);
 
     const rows = await db.Items.findAll({
       transaction,
-      where: { item_id: { [Op.gt]: startFrom } },
+      offset,
+      order: [['item_id', 'ASC']],
     });
 
     await transaction.commit();
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const getByMultipleValues = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const ids = req.query.ids
       ? req.query.ids.split(",").map(Number)
       : [10, 11, 12];
@@ -85,18 +91,19 @@ export const getByMultipleValues = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const { values } = req.body;
 
     if (!Array.isArray(values) || !values.length) {
-      return rollbackAndRespond(
+      return await rollbackAndRespond(
         res,
         transaction,
         400,
@@ -113,18 +120,19 @@ export const deleteByAttributeArray = async (req, res, next) => {
 
     res.json({ success: true, deletedCount: deleted });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };
 
 export const updateItemData = async (req, res, next) => {
-  const transaction = await db.sequelize.transaction();
+  let transaction;
   try {
+    transaction = await db.sequelize.transaction();
     const { item_id, price, amount } = req.body;
 
     if (!item_id) {
-      return rollbackAndRespond(
+      return await rollbackAndRespond(
         res,
         transaction,
         400,
@@ -141,7 +149,7 @@ export const updateItemData = async (req, res, next) => {
 
     res.json({ success: true, data: updatedItem || null });
   } catch (error) {
-    await transaction.rollback();
+    await rollbackTransaction(transaction);
     next(error);
   }
 };

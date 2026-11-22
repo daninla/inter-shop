@@ -29,7 +29,7 @@ export const modelUpdateSchema = yup.object({
 export const orderUpdateSchema = yup.object({
   order_id: idSchema,
   code: yup.string().trim().min(3).max(100).required(),
-  date: yup.date().nullable(),
+  date: yup.date().nonNullable(),
   customer: yup.number().integer().positive().nullable(),
   amount: yup.number().positive().required(),
   paid: yup.boolean().required(),
