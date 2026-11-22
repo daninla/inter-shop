@@ -18,11 +18,10 @@ Content-Type: application/json
 }
 
 ### Update brand
-PATCH {{host}}/brands/update
+PUT {{host}}/brands/update/2
 Content-Type: application/json
 
 {
-  "id": 1,
   "title": "Apple Updated",
   "description": "Updated Apple brand"
 }

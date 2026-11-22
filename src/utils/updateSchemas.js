@@ -3,7 +3,6 @@ import * as yup from 'yup';
 export const idSchema = yup.number().integer().positive().required();
 
 export const brandUpdateSchema = yup.object({
-  id: idSchema,
   title: yup.string().trim().min(2).max(255).required(),
   description: yup.string().trim().max(2000).nullable(),
 });

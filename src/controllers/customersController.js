@@ -1,12 +1,11 @@
 import { Op } from "sequelize";
-import db from "../../database/models/index.js";
+import db from "../database/models/index.js";
+import { rollbackAndRespond } from "../utils/transactionResponse.js";
 
 export const createCustomerData = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const { name, email } = req.body;
-
-    transaction = await db.sequelize.transaction();
 
     const newCustomer = await db.Customers.create(
       { name, email },
@@ -17,20 +16,16 @@ export const createCustomerData = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: newCustomer });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getAllLimited = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const limit = Number(req.query.limit) || 10;
     const safeLimit = Math.max(1, Math.min(limit, 100));
-
-    transaction = await db.sequelize.transaction();
 
     const rows = await db.Customers.findAll({
       transaction,
@@ -41,17 +36,14 @@ export const getAllLimited = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
-    transaction = await db.sequelize.transaction();
 
     const total = await db.Customers.count({ transaction });
     const startFrom = Math.floor(total / 2);
@@ -65,21 +57,17 @@ export const getGreaterThanMiddleId = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getByMultipleValues = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const ids = req.query.ids
       ? req.query.ids.split(",").map(Number)
       : [10, 11, 12];
-
-    transaction = await db.sequelize.transaction();
 
     const rows = await db.Customers.findAll({
       transaction,
@@ -90,25 +78,24 @@ export const getByMultipleValues = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const { values } = req.body;
 
     if (!Array.isArray(values) || !values.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: "values must be a non-empty array" });
+      return rollbackAndRespond(
+        res,
+        transaction,
+        400,
+        "values must be a non-empty array",
+      );
     }
-
-    transaction = await db.sequelize.transaction();
 
     const deleted = await db.Customers.destroy({
       transaction,
@@ -119,25 +106,24 @@ export const deleteByAttributeArray = async (req, res, next) => {
 
     res.json({ success: true, deletedCount: deleted });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const updateCustomerData = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const { id, name, email } = req.body;
 
     if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "id is required" });
+      return rollbackAndRespond(
+        res,
+        transaction,
+        400,
+        "id is required",
+      );
     }
-
-    transaction = await db.sequelize.transaction();
 
     const [, [updatedCustomer]] = await db.Customers.update(
       { name, email },
@@ -148,17 +134,14 @@ export const updateCustomerData = async (req, res, next) => {
 
     res.json({ success: true, data: updatedCustomer || null });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getCustomerWithMostOrders = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
-    transaction = await db.sequelize.transaction();
 
     const [rows] = await db.sequelize.query(
       `
@@ -178,17 +161,14 @@ export const getCustomerWithMostOrders = async (req, res, next) => {
 
     res.json({ success: true, data: rows[0] || null });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getCustomerWithMostExpensiveItem = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
-    transaction = await db.sequelize.transaction();
 
     const [rows] = await db.sequelize.query(
       `
@@ -210,9 +190,7 @@ export const getCustomerWithMostExpensiveItem = async (req, res, next) => {
 
     res.json({ success: true, data: rows[0] || null });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };

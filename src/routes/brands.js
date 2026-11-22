@@ -6,6 +6,7 @@ import {
   getByMultipleValues,
   deleteByAttributeArray,
   updateBrandData,
+  updateBrandLogo,
 } from "../controllers/brandsController.js";
 import validate from "../middleware/validate.js";
 import multerBrandLogo from "../middleware/multerBrandLogo.js";
@@ -31,11 +32,7 @@ router.delete(
   validate(deleteValuesSchema),
   deleteByAttributeArray,
 );
-router.patch(
-  "/update",
-  multerBrandLogo.single("logo"),
-  validate(brandUpdateSchema),
-  updateBrandData,
-);
+router.put("/update/:id", validate(brandUpdateSchema), updateBrandData);
+router.put("/update-logo/:id", multerBrandLogo.single("logo"), updateBrandLogo);
 
 export default router;

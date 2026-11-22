@@ -1,13 +1,13 @@
 import { Op } from "sequelize";
-import db from "../../database/models/index.js";
+import db from "../database/models/index.js";
+import { rollbackAndRespond } from "../utils/transactionResponse.js";
 
 export const createBrandData = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const { title, description } = req.body;
 
     const logo = req.file ? `/uploads/brands/${req.file.filename}` : null;
-    transaction = await db.sequelize.transaction();
 
     const newBrand = await db.Brands.create(
       { title, description, logo },
@@ -18,20 +18,17 @@ export const createBrandData = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: newBrand });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getAllLimited = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const limit = Number(req.query.limit) || 10;
     const safeLimit = Math.max(1, Math.min(limit, 100));
 
-    transaction = await db.sequelize.transaction();
 
     const rows = await db.Brands.findAll({
       transaction,
@@ -42,17 +39,14 @@ export const getAllLimited = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getGreaterThanMiddleId = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
-    transaction = await db.sequelize.transaction();
 
     const total = await db.Brands.count({ transaction });
     const startFrom = Math.floor(total / 2);
@@ -66,21 +60,18 @@ export const getGreaterThanMiddleId = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const getByMultipleValues = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const titles = req.query.titles
       ? req.query.titles.split(",")
       : ["Samsung", "Dell", "Xiaomi"];
 
-    transaction = await db.sequelize.transaction();
 
     const rows = await db.Brands.findAll({
       transaction,
@@ -91,25 +82,20 @@ export const getByMultipleValues = async (req, res, next) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const deleteByAttributeArray = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
     const { values } = req.body;
 
     if (!Array.isArray(values) || !values.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: "values must be a non-empty array" });
+      return rollbackAndRespond(res, transaction, 400, "values must be a non-empty array");
     }
 
-    transaction = await db.sequelize.transaction();
 
     const deleted = await db.Brands.destroy({
       transaction,
@@ -120,30 +106,22 @@ export const deleteByAttributeArray = async (req, res, next) => {
 
     res.json({ success: true, deletedCount: deleted });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
+    await transaction.rollback();
     next(error);
   }
 };
 
 export const updateBrandData = async (req, res, next) => {
-  let transaction;
+  const transaction = await db.sequelize.transaction();
   try {
-    const { id, title, description } = req.body;
+    const { id } = req.params;
+    const { title, description } = req.body;
 
     if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "id is required" });
+      return rollbackAndRespond(res, transaction, 400, "id is required");
     }
 
     const data = { title, description };
-    if (req.file) {
-      data.logo = `/uploads/brands/${req.file.filename}`;
-    }
-
-    transaction = await db.sequelize.transaction();
 
     const [, [updatedBrand]] = await db.Brands.update(data, {
       where: { id },
@@ -155,9 +133,36 @@ export const updateBrandData = async (req, res, next) => {
 
     res.json({ success: true, data: updatedBrand || null });
   } catch (error) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+export const updateBrandLogo = async (req, res, next) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return rollbackAndRespond(res, transaction, 400, "id is required");
     }
+
+    if (!req.file) {
+      return rollbackAndRespond(res, transaction, 400, "logo file is required");
+    }
+
+    const logo = `/uploads/brands/${req.file.filename}`;
+
+    const [, [updatedBrand]] = await db.Brands.update(
+      { logo },
+      { where: { id }, returning: true, transaction },
+    );
+
+    await transaction.commit();
+
+    res.json({ success: true, data: updatedBrand || null });
+  } catch (error) {
+    await transaction.rollback();
     next(error);
   }
 };
