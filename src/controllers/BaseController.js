@@ -16,9 +16,8 @@ export default class BaseController {
   }
 
   async execute(res, next, action, status = 200) {
-    let transaction;
+    const transaction = await this.model.sequelize.transaction();
     try {
-      transaction = await this.model.sequelize.transaction();
       const result = await action(transaction);
       await transaction.commit();
       return res.status(status).json({ success: true, ...result });
